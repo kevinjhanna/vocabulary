@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+  </head>
+<body>
+  <div id="viz"></div>
+
+  <script type="text/javascript">
+
+    var data; // a global
+
+    d3.json("http://localhost:8080/translations1.json", function(error, json) {
+        if (error) return console.warn(error);
+        data = json;
+        run();
+    });
+
+    // var relation_index = {}
+
+    // for (relation of data) {
+    //   console.log(relation);
+    //   relation_index
+    // }
+
+
+    function run() {
+
+      var svg = d3.select("#viz").append("svg").attr("width", 500).attr("height", 500);
+
+      var y = d3.scale.linear()
+            .domain ([0, data.length])
+            .range([50, 300]);
+
+
+      var relations = svg
+        .selectAll('circle')
+        .data(data)
+        .enter()
+        .append('g')
+
+      var nested = relations
+        .append('g')
+        .selectAll("circle")
+        .data(function(d, i) { return d.words.map(function(w) { return { word: w, origin: i } } ); })
+        .enter()
+
+
+        nested
+          .append('line')
+          .attr('x1', 50)
+          .attr('x2', 50 + 400)
+          .attr('y2', function(d, i) { return y(i); })
+          .attr('y1', function(d, i) { return y(d.origin); })
+          .style('stroke', 'red')
+
+        nested.append("circle")
+          .attr('r', 40)
+          .attr('cx', 50 + 400)
+          .attr('cy', function(d, i) { return y(i); })
+          .style('stroke', 'white')
+          .style('fill', 'blue')
+          .append("svg:title").text(function(d) { return d.word; })
+
+        relations
+          .append('circle')
+          .attr('r', 40)
+          .attr('cx', 50)
+          .attr('cy', function(d, i) { return y(i); })
+          .style('stroke', 'white')
+          .style('fill', 'black')
+          .append("svg:title").text(function(d) { return d.translation; })
+
+
+    }
+
+
+      // var circle = svg.append("circle")
+      // .attr("r", 40).attr("cx", 50).attr("cy", 50).style("stroke", "white").style("fill", "black")
+      // .on("mouseover", function() { d3.select(this).style("fill", "gray");  })
+      // .on("mouseout" , function() { d3.select(this).style("fill", "black"); })
+  </script>
+  </body>
+</html>

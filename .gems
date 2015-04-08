@@ -1,0 +1,3 @@
+nokogiri -v 1.6.6.2
+redic -v 1.4.1
+net-http-persistent -v 2.9.4
