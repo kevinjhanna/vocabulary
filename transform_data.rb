@@ -3,7 +3,6 @@ require "json"
 require "nokogiri"
 require "net/http/persistent"
 require "redic"
-require "csv"
 
 redis = Redic.new
 
@@ -32,7 +31,7 @@ class Translator
 end
 
 data =  Hash.new { |hash, key| hash[key] = [] }
-redis.call("ZRANGE", "Counts", "-1000", "-1", "WITHSCORES").each_slice(2) do |word, score|
+redis.call("ZRANGE", "Counts", "-100", "-1", "WITHSCORES").each_slice(2) do |word, score|
 
   tries = 2
   begin

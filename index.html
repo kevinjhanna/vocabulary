@@ -2,77 +2,85 @@
 <html>
   <head>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-
   </head>
 <body>
   <div id="viz"></div>
 
   <script type="text/javascript">
 
-    var data; // a global
+    var data;
 
-    d3.json("http://localhost:8080/translations1.json", function(error, json) {
+
+    d3.json("http://localhost:8080/translations2.json", function(error, json) {
         if (error) return console.warn(error);
         data = json;
         run();
     });
 
-    // var relation_index = {}
 
-    // for (relation of data) {
-    //   console.log(relation);
-    //   relation_index
-    // }
+    var height = 800,
+        width = 700,
+        circleRadio = 3
 
+    var colors = d3.scale.category10()
 
     function run() {
+      // data = data.slice(0, 10)
 
-      var svg = d3.select("#viz").append("svg").attr("width", 500).attr("height", 500);
+      console.log(data);
+      var svg = d3.select("#viz").append("svg").attr("width", width).attr("height", height);
 
       var y = d3.scale.linear()
             .domain ([0, data.length])
-            .range([50, 300]);
+            .range([circleRadio, height - circleRadio]);
 
+      var totalEnglishWords = data.reduce(function(a, b) {
+          return a + b.words.length;
+      }, 0);
+
+      var wordY = d3.scale.linear()
+            .domain ([0, totalEnglishWords])
+            .range([circleRadio, height - circleRadio]);
+
+      console.log('ingles: ' + totalEnglishWords)
+      console.log('español: ' + data.length)
 
       var relations = svg
-        .selectAll('circle')
+        .selectAll('g')
         .data(data)
         .enter()
         .append('g')
 
+
+      var blueI = 0
       var nested = relations
         .append('g')
         .selectAll("circle")
-        .data(function(d, i) { return d.words.map(function(w) { return { word: w, origin: i } } ); })
+        .data(function(d, i) { return d.words.map(function(w) { return { hay: d.words.length, word: w, voy: i, soy: blueI++ } } ); })
         .enter()
-
 
         nested
           .append('line')
-          .attr('x1', 50)
-          .attr('x2', 50 + 400)
-          .attr('y2', function(d, i) { return y(i); })
-          .attr('y1', function(d, i) { return y(d.origin); })
-          .style('stroke', 'red')
+          .attr('x1', circleRadio)
+          .attr('x2', width - circleRadio)
+          .attr('y1', function(d, i) { return wordY(d.soy); })
+          .attr('y2', function(d, i) { return y(d.voy); })
+          .style('stroke', function(d, i) { return colors(d.hay) } )
 
         nested.append("circle")
-          .attr('r', 40)
-          .attr('cx', 50 + 400)
-          .attr('cy', function(d, i) { return y(i); })
-          .style('stroke', 'white')
+          .attr('r', circleRadio)
+          .attr('cx', circleRadio)
+          .attr('cy', function(d, i) { return wordY(d.soy); })
           .style('fill', 'blue')
           .append("svg:title").text(function(d) { return d.word; })
 
         relations
           .append('circle')
-          .attr('r', 40)
-          .attr('cx', 50)
+          .attr('r', circleRadio)
+          .attr('cx', width - circleRadio)
           .attr('cy', function(d, i) { return y(i); })
           .style('stroke', 'white')
-          .style('fill', 'black')
           .append("svg:title").text(function(d) { return d.translation; })
-
-
     }
 
 
