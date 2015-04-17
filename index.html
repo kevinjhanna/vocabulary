@@ -11,16 +11,16 @@
     var data;
 
 
-    d3.json("http://localhost:8080/translations2.json", function(error, json) {
+    d3.json("https://gist.githubusercontent.com/kevinjhanna/6d640d98ac67cc8da44a/raw/ac7e05866694444cb96fd903bcbd5c82b5e2dcfa/gistfile1.txt", function(error, json) {
         if (error) return console.warn(error);
         data = json;
         run();
     });
 
 
-    var height = 800,
-        width = 700,
-        circleRadio = 3
+    var height = 3000,
+        width = 300,
+        circleRadio = 5
 
     var colors = d3.scale.category10()
 
@@ -32,7 +32,7 @@
 
       var y = d3.scale.linear()
             .domain ([0, data.length])
-            .range([circleRadio, height - circleRadio]);
+            .range([circleRadio + 50, height - circleRadio]);
 
       var totalEnglishWords = data.reduce(function(a, b) {
           return a + b.words.length;
@@ -40,7 +40,7 @@
 
       var wordY = d3.scale.linear()
             .domain ([0, totalEnglishWords])
-            .range([circleRadio, height - circleRadio]);
+            .range([circleRadio + 50, height - circleRadio]);
 
       console.log('ingles: ' + totalEnglishWords)
       console.log('español: ' + data.length)
@@ -54,22 +54,21 @@
 
       var blueI = 0
       var nested = relations
-        .append('g')
-        .selectAll("circle")
+        .selectAll("g")
         .data(function(d, i) { return d.words.map(function(w) { return { hay: d.words.length, word: w, voy: i, soy: blueI++ } } ); })
         .enter()
 
         nested
           .append('line')
-          .attr('x1', circleRadio)
-          .attr('x2', width - circleRadio)
+          .attr('x1', circleRadio + 100)
+          .attr('x2', width - circleRadio -100)
           .attr('y1', function(d, i) { return wordY(d.soy); })
           .attr('y2', function(d, i) { return y(d.voy); })
           .style('stroke', function(d, i) { return colors(d.hay) } )
 
         nested.append("circle")
           .attr('r', circleRadio)
-          .attr('cx', circleRadio)
+          .attr('cx', circleRadio + 100)
           .attr('cy', function(d, i) { return wordY(d.soy); })
           .style('fill', 'blue')
           .append("svg:title").text(function(d) { return d.word; })
@@ -77,12 +76,31 @@
         relations
           .append('circle')
           .attr('r', circleRadio)
-          .attr('cx', width - circleRadio)
+          .attr('cx', width - circleRadio - 100)
           .attr('cy', function(d, i) { return y(i); })
           .style('stroke', 'white')
-          .append("svg:title").text(function(d) { return d.translation; })
-    }
+      //    .append("svg:title").text(function(d) { return d.translation; })
+    
+    
+         nested.append("text")                    
+           .attr("x", circleRadio + 100 - 20)
+           .attr("y", function(d, i) { return wordY(d.soy); })
+           .text(function(d){ return d.word;})
+           .attr("font-family", "Verdana")
+           .attr("font-size", "16px")
+           .attr("text-anchor", "end")
+           .attr("fill", "black");
+      
+          relations.append("text")                    
+           .attr("x", width - circleRadio - 100 + 20)
+           .attr("y", function(d, i) { return y(i); })
+           .text(function(d){ return d.translation;})
+           .attr("font-family", "Verdana")
+           .attr("font-size", "16px")
+           .attr("text-anchor", "start")
+           .attr("fill", "black");
 
+    }
 
       // var circle = svg.append("circle")
       // .attr("r", 40).attr("cx", 50).attr("cy", 50).style("stroke", "white").style("fill", "black")
