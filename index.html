@@ -19,7 +19,7 @@
 
 
     var height = 3000,
-        width = 300,
+        width = 400,
         circleRadio = 5
 
     var colors = d3.scale.category10()
@@ -60,30 +60,30 @@
 
         nested
           .append('line')
-          .attr('x1', circleRadio + 100)
-          .attr('x2', width - circleRadio -100)
+          .attr('x1', circleRadio + 150)
+          .attr('x2', width - circleRadio -150)
           .attr('y1', function(d, i) { return wordY(d.soy); })
           .attr('y2', function(d, i) { return y(d.voy); })
           .style('stroke', function(d, i) { return colors(d.hay) } )
 
         nested.append("circle")
-          .attr('r', circleRadio)
-          .attr('cx', circleRadio + 100)
+          .attr('r', function(d) { return circleRadio + Math.floor(Math.random() * 6)})
+          .attr('cx', circleRadio + 150)
           .attr('cy', function(d, i) { return wordY(d.soy); })
-          .style('fill', 'blue')
+          .style('fill', '#D4D4D4')
           .append("svg:title").text(function(d) { return d.word; })
 
         relations
           .append('circle')
           .attr('r', circleRadio)
-          .attr('cx', width - circleRadio - 100)
+          .attr('cx', width - circleRadio - 150)
           .attr('cy', function(d, i) { return y(i); })
-          .style('stroke', 'white')
+          .style('fill', '#D4D4D4')
       //    .append("svg:title").text(function(d) { return d.translation; })
     
     
          nested.append("text")                    
-           .attr("x", circleRadio + 100 - 20)
+           .attr("x", circleRadio + 150 - 20)
            .attr("y", function(d, i) { return wordY(d.soy); })
            .text(function(d){ return d.word;})
            .attr("font-family", "Verdana")
@@ -92,7 +92,7 @@
            .attr("fill", "black");
       
           relations.append("text")                    
-           .attr("x", width - circleRadio - 100 + 20)
+           .attr("x", width - circleRadio - 150 + 20)
            .attr("y", function(d, i) { return y(i); })
            .text(function(d){ return d.translation;})
            .attr("font-family", "Verdana")
