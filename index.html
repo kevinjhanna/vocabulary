@@ -1,22 +1,43 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Vocabulary</title>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   </head>
 <body>
-  <div id="viz"></div>
+  <div style="float:left" id="viz"></div>
+
+  <div style="width: 400px; float:left;  margin-left: 50px;font-family: 'Verdana'">
+    <h1>Vocabulary</h1>
+    <p>Leo mucho en inglés: blogs de emprendedores y textos en interfaces de usuarios de aplicaciones web o en el teléfono.</p>
+
+    <p>A veces cuando quiero escribir algo sobre esas temáticas o tengo que poner los textos en una interfaz de usuario siento que me faltan las palabras para hacerlo.</p>
+
+    <p>Palabras que no tienen el mismo significado en español o suenan raro por ejemplo "ship", "side-project", "accountability", etc.</p>
+
+    <p>O variedad de palabras en inglés como "title", "heading" que todas traducen a "título".</p>
+
+    <p>La idea del proyecto es descubrir si yo no encuentro esas palabras para escribir porque me falta practica escribiendo, o porque realmente faltan esas palabras que se usan en inglés y no existen en español, o la traducción suena a que nunca se usa en el vocabulario nuestro.</p>
+
+    <p>Para eso, descargué los posts de un blog que me gusta, corrí un script para ver las palabras más usadas, e hice una lista [recopilación].</p>
+
+    <p>Luego traduje esa lista con otro script usando wordreference.com [transformación].</p>
+
+    <p>Y por último, armé esta visualicación para poder plasmarlo.</p>
+    <p style="text-align:right">- Kevin</p>
+  </div>
+
 
   <script type="text/javascript">
 
     var data;
 
-
-    d3.json("https://gist.githubusercontent.com/kevinjhanna/6d640d98ac67cc8da44a/raw/ac7e05866694444cb96fd903bcbd5c82b5e2dcfa/gistfile1.txt", function(error, json) {
+    d3.json("https://gist.githubusercontent.com/kevinjhanna/6d640d98ac67cc8da44a/raw/1fd28e59a4777c5c0386af269fea9c9c056bd802/gistfile2.txt", function(error, json) {
         if (error) return console.warn(error);
         data = json;
         run();
     });
-
 
     var height = 3000,
         width = 400,
@@ -25,10 +46,14 @@
     var colors = d3.scale.category10()
 
     function run() {
-      // data = data.slice(0, 10)
+      data.reverse();
 
-      console.log(data);
       var svg = d3.select("#viz").append("svg").attr("width", width).attr("height", height);
+
+      var radio = d3.scale.linear()
+            .domain ([0, 150])
+            .range([circleRadio, circleRadio * 3]);
+
 
       var y = d3.scale.linear()
             .domain ([0, data.length])
@@ -42,8 +67,21 @@
             .domain ([0, totalEnglishWords])
             .range([circleRadio + 50, height - circleRadio]);
 
-      console.log('ingles: ' + totalEnglishWords)
-      console.log('español: ' + data.length)
+      svg.append("text").text("Palabras en inglés")
+           .attr("x", circleRadio + 150 - 20)
+           .attr("y", 20)
+           .attr("font-family", "Verdana")
+           .attr("font-size", "13px")
+           .attr("text-anchor", "end")
+           .attr("fill", "gray")
+
+      svg.append("text").text("Traducciones")
+          .attr('x', width - circleRadio - 150 + 20)
+           .attr("y", 20)
+           .attr("font-family", "Verdana")
+           .attr("font-size", "13px")
+           .attr("text-anchor", "start")
+           .attr("fill", "gray")
 
       var relations = svg
         .selectAll('g')
@@ -55,7 +93,7 @@
       var blueI = 0
       var nested = relations
         .selectAll("g")
-        .data(function(d, i) { return d.words.map(function(w) { return { hay: d.words.length, word: w, voy: i, soy: blueI++ } } ); })
+        .data(function(d, i) { return d.words.map(function(w) { return { hay: d.words.length, word: w.word, score: w.score, voy: i, soy: blueI++ } } ); })
         .enter()
 
         nested
@@ -67,11 +105,11 @@
           .style('stroke', function(d, i) { return colors(d.hay) } )
 
         nested.append("circle")
-          .attr('r', function(d) { return circleRadio + Math.floor(Math.random() * 6)})
+          .attr('r', function(d) { return radio(d.score)})
           .attr('cx', circleRadio + 150)
           .attr('cy', function(d, i) { return wordY(d.soy); })
           .style('fill', '#D4D4D4')
-          .append("svg:title").text(function(d) { return d.word; })
+          .append("svg:title").text(function(d) { return d.score; })
 
         relations
           .append('circle')
@@ -79,10 +117,9 @@
           .attr('cx', width - circleRadio - 150)
           .attr('cy', function(d, i) { return y(i); })
           .style('fill', '#D4D4D4')
-      //    .append("svg:title").text(function(d) { return d.translation; })
-    
-    
-         nested.append("text")                    
+
+
+         nested.append("text")
            .attr("x", circleRadio + 150 - 20)
            .attr("y", function(d, i) { return wordY(d.soy); })
            .text(function(d){ return d.word;})
@@ -90,8 +127,8 @@
            .attr("font-size", "16px")
            .attr("text-anchor", "end")
            .attr("fill", "black");
-      
-          relations.append("text")                    
+
+          relations.append("text")
            .attr("x", width - circleRadio - 150 + 20)
            .attr("y", function(d, i) { return y(i); })
            .text(function(d){ return d.translation;})
